@@ -70,6 +70,7 @@ $A_3$   &  $C_1$, $C_3$ & Tables II-III \\
         &        & Figure 2\\
         \midrule
 $A_3$   &  $C_1$ & Figure 8\\
+\midrule
 $A_4$   &  $C_4$ & Figures 2b and 2c\\
 \bottomrule
 \end{tabular}
@@ -259,7 +260,7 @@ An example command to perform the Cu benchmark on 8 nodes is: \\
 To run all benchmarks, follow the procedure below:
 \begin{enumerate}
 \item	Clone the git repository\\ \phantom{xxx}\gitrepo %% I made a command for the repo address, so we can easily change.
-\item	Go into the sub-directory \texttt{gpu\_benchmarks}
+\item	Go into the sub-directory \texttt{MD/CS2-AD-AE/gpu\_benchmarks}
 
 \item	Update the \texttt{\#SBATCH --account=xxx} command in \texttt{run\_multi.sh} to use your account on Frontier
 
@@ -311,7 +312,7 @@ This artifact is the power data used to assess energy consumption for the CPU an
 
 For the dual-socket CPU runs on the Quartz cluster, we assumed a power consumption of 300 W per node (36 cores). The is an estimate based on the maximum power use of the CPUs at $2\times 120$ W per socket plus an additional 25\% to allow for memory (DRAM), network equipment and auxiliary power usage. For the GPU runs on Frontier, we used the published power consumption\footnote{\url{https://top500.org/lists/top500/list/2024/06}, accessed online June 28, 2024} of 22.8 MW, and divided by 9472 compute nodes, to get a power consumption of about 2400 W per node.
 
-WSE systems include the power meter constantly monitoring operational power draw. In our experiments the readouts were stable and never exceeded the 23kW level which is the nominal power limit for CS-2 systems.
+WSE systems include a power meter which constantly monitors operational power draw. In our experiments the readouts were stable and never exceeded the 23kW level which is the nominal power limit for CS-2 systems.
 
 We believe these power estimates are sufficiently accurate to clearly illustrate the large difference in energy consumption between conventional hardware and the Cerebras CS-2 for the molecular dynamics simulations presented in this paper.
 
