@@ -1,0 +1,318 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tagging}
+\usepackage{url}
+
+\usepackage{sc24repro}
+
+% Uncomment/comment the following usetag lines 
+% if you would like to get an explanation or an example.
+% Don't forget to comment them for the final submission.
+\usetag{explanation}
+\usetag{example}
+
+\begin{document}
+%% The gitrepo command holds the current address of the AD repo. If you use
+%% this, we can easily update the document when we move it to a permanent place,
+%% e.g. when we submit the camera ready version.
+\newcommand{\gitrepo}{\texttt{https://github.com/CerebrasResearch/ Cerebras-Trilabs}}
+
+\twocolumn[%
+{\begin{center}
+\Huge
+Appendix: Artifact Description        
+\end{center}}
+]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  AD Appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendixAD
+
+\section{Overview of Contributions and Artifacts}
+
+\subsection{Paper's Main Contributions}
+
+\begin{description}
+\item[$C_1$] Novel mapping and dataflow EAM MD algorithm for atomistic simulations on the Cerebras Wafer-Scale Engine (WSE).
+\item[$C_2$] Reference SOTA performance measurements of EAM MD on GPUs and CPUs.
+\item[$C_3$] Observed performance improved by orders of magnitude.
+\item[$C_4$] Energy consumption improved by an order of magnitude or more.
+\end{description}
+
+\subsection{Computational Artifacts}
+
+\begin{description}
+\item[$A_1$] CPU reference run descriptions (in this document).
+\item[$A_2$] GPU reference run descriptions (in this document).
+\item[$A_3$] WSE run description. The WSE code in the Tungsten dataflow programming language is undergoing a legal review for release.
+\item[$A_4$] Power metrics
+\end{description}
+
+\begin{center}
+\begin{tabular}{rll}
+\toprule
+Artifact ID  &  Contributions &  Related \\
+             &  Supported     &  Paper Elements \\
+\midrule
+$A_1$, $A_2$   &  $C_2$ & Table III \\
+        &        & Figure 2\\
+\midrule
+$A_3$   &  $C_1$, $C_3$ & Tables II-III \\
+        &        & Figure 2\\
+        \midrule
+$A_3$   &  $C_1$ & Figure 8\\
+$A_4$   &  $C_4$ & Figures 2b and 2c\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Artifact Identification}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newartifact
+
+\artrel
+
+This artifact is the timing data of the CPU data points in Figure 2. The best performance points for the CPU systems are also displayed in Table III.
+
+\artexp
+
+These computational experiments demonstrate the performance of the LAMMPS simulation code on CPUs. The resulting timings are used to compare to corresponding timing data for the WSE CS-2 code. These CPU results are significantly slower than the corresponding simulations on the WSE CS-2 chip, and puts its speed in context to leading conventional hardware and algorithms.
+
+\arttime
+
+The expected computational time for a single benchmark experiment using dual-socket nodes with Intel Xeon E5-2695v4 CPUs, is up to 7 minutes using 8 nodes. The runtime is inversely proportional to the node-count up to around 50 nodes.
+
+\artin
+
+\artinpart{Hardware}
+
+The experiments were conducted using the Quartz cluster at LLNL. Each node has 2 Xeon E5-2695v4 18C 2.1GHz CPUs, 128GBytes of DRAM. The nodes are interconnected with Intel Omni-Path network. Quartz is further documented here:\\ \phantom{xxx}\url{https://www.top500.org/system/178971/}.\\
+%
+To reproduce all data points in Figure 2, 400 nodes are required.
+
+\artinpart{Software}
+
+These experiments used the LAMMPS software, available for public download from \url{lammps.org}. The LAMMPS version was ``Large-scale Atomic/Molecular Massively Parallel Simulator - 8 Feb 2023'', and was retrieved from git with the specific commit hash tag of\\
+\phantom{xxx}\texttt{730e5d2e64106f3e5357fd739b44c7eec19c7d2a}\\ of the \texttt{develop} branch. The following LAMMPS packages were enabled:\\ \phantom{xxx}MANYBODY, MEAM, MOLECULE, RIGID.\\
+%
+We used the MPI communication library "MPI v3.1: MVAPICH2 Version: 2.3.7
+MVAPICH2 Release date: Wed March 02 22:00:00 EST 2022".
+%
+The operating system version was Linux "Red Hat Enterprise Linux 8.9 (Ootpa)" 4.18.0-513.18.1.2toss.t4.x86\_64 x86\_64, and the SLURM scheduler was used for job submitting and launching jobs.
+%}
+
+\artinpart{Datasets / Inputs}
+
+Scripts for generating initial conditions, and for running the timing benchmarks, as well as all necessary input files to LAMMPS, are in the git repository\\ \phantom{xxx}\gitrepo,\\ in the \texttt{MD/CS2-AD-AE/cpu\_benchmarks} sub-directory.
+
+%\artexpl{
+%Describe the datasets required by the artifact. Indicate whether the datasets can be generated, including instructions, or if they are available for download, providing the corresponding URL.
+%}
+
+\artinpart{Installation and Deployment}
+
+%\artexpl{
+%\textcolor{red}{Detail the requirements for compiling, deploying, and executing the experiments, including necessary compilers and their versions.}
+
+To compile LAMMPS we used the standard MPI makefile \texttt{Makefile.mpi} included with the source code, which had the compiler and linker flags set to \texttt{-g -O3 -std=c++11}.
+
+Compiler: Intel Classic C++ 20.21.6 / Intel(R) C++ g++ 10.3.1 mode with OpenMP not enabled
+C++ standard: C++11
+%}
+
+
+\artcomp
+
+%\artexpl{
+%{\color{red}Provide an abstract description of the experiment workflow of the artifact. It is important to identify the main tasks (processes) and how they depend on each other. 
+
+%A workflow may consist of three tasks: $T_1, T_2$, and $T_3$. The task $T_1$ may generate a specific dataset. This dataset is then used as input by a computational task $T_2$, and the output of $T_2$ is processed by another task $T_3$, which produces the final results (e.g., plots, tables, etc.). State the individual tasks $T_i$ and provide their dependencies, e.g., $T_1 \rightarrow T_2 \rightarrow T_3$.
+
+%Provide details on the experimental parameters. How and why were parameters set to a specific value (if relevant for the reproduction of an artifact), e.g., size of dataset, number of data points, input sizes, etc. Additionally, include details on statistical parameters, like the number of repetitions.}
+
+An example command to perform the Cu benchmark on 8 nodes is: \\
+\texttt{%
+\phantom{xxx}nnodes=8 \\
+\phantom{xxx}srun -N\$nnodes -n\$((\$nnodes*36)) $\backslash$ \\
+  \phantom{xxxxx}lmp\_mpi\_quartz -in in.bench $\backslash$ \\
+  \phantom{xxxxx}-var element Cu -var pbc 0 $\backslash$ \\
+  \phantom{xxxxx}-var nx 172 -var ny 192 -var nz 6 $\backslash$ \\
+  \phantom{xxxxx}-log bench.log
+}
+
+To generate all initial conditions and to run all benchmarks, follow the procedure below:
+\begin{enumerate}
+\item	Clone the git repository:\\ \phantom{xxx}\gitrepo.
+\item	Go into the sub-directory \texttt{MD/CS2-AD-AE/cpu\_benchmarks}.
+\item	Edit the variable \texttt{lmp} in the beginning of \texttt{make\_max\_cfgs.sh} and \texttt{scale\_bench.sh} to point to the LAMMPS executable to use.
+\item	Edit the \texttt{srun} commands in \texttt{make\_max\_cfgs.sh} and \texttt{scale\_bench.sh} to be the correct job running/job submission commands for your machine.
+\item	Adjust the \texttt{nnodes} loop in \texttt{scale\_bench.sh} to run over the desired node counts.
+\item	Run or source the \texttt{make\_max\_cfgs.sh} script to produce initial conditions. Using 8 nodes (as listed on the \texttt{srun} line in the script), this process will run three jobs which each should complete in less than two minutes. The resulting configuration files can be found in \texttt{$\{$Cu,Ta,W$\}$/cfgs}.
+\item	Run or source the \texttt{scale\_bench.sh} script to perform the benchmark simulations. It runs one job per element per node count. On 8 nodes such a job takes up to 7 minutes. The runtime is inversely proportional to the node-count up to around 50 nodes.
+\item	The runtime for the simulations can be extracted by the command:\\
+     \phantom{xxx}\texttt{grep Loop nbench.log.*}
+\end{enumerate}
+%}
+
+\newartifact
+
+\artrel
+
+This artifact is the timing data of the GPU data points in Figure 2. The best performance points for the GPU systems are also displayed in Table III.
+
+\artexp
+
+These computational experiments demonstrate the performance of the LAMMPS simulation code on GPUs. The resulting timings are used to compare to corresponding timing data for the WSE CS-2 code. These GPU results are significantly slower than the corresponding simulations on the WSE CS-2 chip, and puts its speed in context to leading conventional hardware and algorithms.
+
+\arttime
+
+The expected computational time on Frontier for a single benchmark data point is less than 2 minutes in all cases. All runs combined should take less than 30 minutes.
+
+\artin
+
+\artinpart{Hardware}
+
+\artexpl{
+%\textcolor{red}{Specify the hardware requirements and dependencies (e.g., a specific interconnect or GPU type is required).
+}
+
+The experiments were conducted using the OLCF Frontier exascale supercomputer. Each Frontier node consists of 8 AMD Instinct MI250X GPU compute dies (GCDs) attached to an AMD Optimized 3rd Generation EPYC 64C 2GHz CPU. A total of 9,408 nodes are connected together by HPE's Slingshot-11 network. Frontier is further documented here: \url{https://www.top500.org/system/180047/}.
+
+To reproduce all GPU data points in Figure 2, 32 nodes are required.
+
+\artinpart{Software}
+
+%\artexpl{
+%\textcolor{red}{Introduce all required software packages, including the computational artifact. For each software package, specify the version and provide the URL.}
+
+The LAMMPS version was ``Large-scale Atomic/Molecular Massively Parallel Simulator - 7 Feb 2023'', and was retrieved from git with the specific commit hash tag of \texttt{edcbd2e7618518e6bb1a5d843081474d7176872d} of the \texttt{develop} branch.
+
+\artinpart{Datasets / Inputs}
+
+Scripts for running the timing benchmarks, as well as all necessary input files to LAMMPS, are in the git repository\\ \phantom{xxx}\gitrepo,\\ in the \texttt{MD/CS2-AD-AE/gpu\_benchmarks} sub-directory.
+
+\artinpart{Installation and Deployment}
+
+The following modules were loaded on top of the default modules: \texttt{cray-mpich/8.1.27}, \texttt{rocm/5.7.1}.
+
+LAMMPS was compiled using \texttt{Makefile.frontier\_kokkos} included with the source code. The following LAMMPS packages were enabled:\\ \phantom{xxx}KOKKOS, MANYBODY.\\
+%
+The following environment variables were set:
+\begin{itemize}
+\item \texttt{MPICH\_GPU\_SUPPORT\_ENABLED=1}
+\item 
+\texttt{MPICH\_OFI\_NIC\_POLICY=NUMA}
+\item 
+\texttt{LD\_LIBRARY\_PATH= \\
+\$\{CRAY\_LD\_LIBRARY\_PATH\}:\$\{LD\_LIBRARY\_PATH\}}
+\end{itemize}
+The SLURM scheduler was used for job submitting and launching jobs.
+%}
+
+\artcomp
+
+%\artexpl{
+%{\color{red}Provide an abstract description of the experiment workflow of the artifact. It is important to identify the main tasks (processes) and how they depend on each other. 
+
+%A workflow may consist of three tasks: $T_1, T_2$, and $T_3$. The task $T_1$ may generate a specific dataset. This dataset is then used as input by a computational task $T_2$, and the output of $T_2$ is processed by another task $T_3$, which produces the final results (e.g., plots, tables, etc.). State the individual tasks $T_i$ and provide their dependencies, e.g., $T_1 \rightarrow T_2 \rightarrow T_3$.
+
+%Provide details on the experimental parameters. How and why were parameters set to a specific value (if relevant for the reproduction of an artifact), e.g., size of dataset, number of data points, input sizes, etc. Additionally, include details on statistical parameters, like the number of repetitions.}
+
+An example command to perform the Cu benchmark on 1 GCD is: \\
+\texttt{%
+\phantom{xxx}srun -u -N1 -n1 -c1 $\backslash$ \\
+\phantom{xxxxx}--cpu-bind=map\_cpu:50 $\backslash$ \\
+ \phantom{xxxxx}--gpus=1 ./lmp\_frontier\_kokkos $\backslash$ \\
+ \phantom{xxxxx}-in in.bench -k on g 1 -sf kk $\backslash$ \\
+ \phantom{xxxxx}-pk kokkos neigh full newton off $\backslash$ \\
+\phantom{xxxxx}-var element Cu $\backslash$ \\
+\phantom{xxxxx}-var nx 172 -var ny 192 $\backslash$ \\
+\phantom{xxxxx}-var nz 6 -var pbc 0 $\backslash$ \\
+\phantom{xxxxx}-log bench.log
+}
+
+An example command to perform the Cu benchmark on 8 nodes is: \\
+\texttt{%
+\phantom{xxx}srun -u -N 8 --ntasks-per-node=8 $\backslash$ \\
+ \phantom{xxxxx}--cpus-per-task=6 --gpus-per-task=1 $\backslash$ \\
+ \phantom{xxxxx}--gpu-bind=closest $\backslash$ \\
+ \phantom{xxxxx}./lmp\_frontier\_kokkos $\backslash$ \\
+ \phantom{xxxxx}-in in.bench -k on g 1 -sf kk $\backslash$ \\
+ \phantom{xxxxx}-pk kokkos neigh full newton off $\backslash$ \\
+\phantom{xxxxx}-var element Cu $\backslash$ \\
+\phantom{xxxxx}-var nx 172 -var ny 192 $\backslash$ \\
+\phantom{xxxxx}-var nz 6 -var pbc 0 $\backslash$ \\
+\phantom{xxxxx}-log bench.log
+}
+
+To run all benchmarks, follow the procedure below:
+\begin{enumerate}
+\item	Clone the git repository\\ \phantom{xxx}\gitrepo %% I made a command for the repo address, so we can easily change.
+\item	Go into the sub-directory \texttt{gpu\_benchmarks}
+
+\item	Update the \texttt{\#SBATCH --account=xxx} command in \texttt{run\_multi.sh} to use your account on Frontier
+
+\item Update the variable \texttt{EXE} in the \texttt{run\_multi.sh} script to point to your LAMMPS executable
+
+\item Submit the \texttt{run\_multi.sh} to the Frontier queue using the SLURM \texttt{sbatch} command. This process will run several LAMMPS jobs, each of which should complete in less than two minutes.
+
+\item	The runtime for the simulations can be extracted by the command:\\
+     \phantom{xxx}\texttt{grep "Loop time" bench.log.*}
+\end{enumerate}
+%}
+
+\newartifact
+
+\artrel
+
+This artifact is the timing data of the WSE data points in Figure 2. The performance points for the system are also displayed in Table III.
+
+\artexp
+
+These computational experiments demonstrate the performance of the EAM MD implementation on WSE. The performance exceeds LAMMPS on CPU and GPU systems by a few orders of magnitude.
+
+\arttime
+
+Each run takes less than 5 minutes.
+
+\artin
+
+\artinpart{Hardware}
+
+WSE experiments were conducted on a CS-2 system equipped with $769\times 1044$ processing elements. System clock rate is configurable and was set to 850MHz. 
+
+\artinpart{Software}
+The EAM algorithm was written in the Tungsten programming language and compiled with an internal compiler (April 2024 release). 
+
+Cerebras plans to make the compiler accessible to researchers through partnerships with PSC, EPCC, and participation in the NAIRR Pilot program.
+
+\artinpart{Datasets / Inputs}
+
+The datasets from the LAMMPS runs are used for the WSE runs.
+
+\newartifact
+
+\artrel
+
+This artifact is the power data used to assess energy consumption for the CPU and GPU runs.
+
+\artexp
+
+For the dual-socket CPU runs on the Quartz cluster, we assumed a power consumption of 300 W per node (36 cores). The is an estimate based on the maximum power use of the CPUs at $2\times 120$ W per socket plus an additional 25\% to allow for memory (DRAM), network equipment and auxiliary power usage. For the GPU runs on Frontier, we used the published power consumption\footnote{\url{https://top500.org/lists/top500/list/2024/06}, accessed online June 28, 2024} of 22.8 MW, and divided by 9472 compute nodes, to get a power consumption of about 2400 W per node.
+
+WSE systems include the power meter constantly monitoring operational power draw. In our experiments the readouts were stable and never exceeded the 23kW level which is the nominal power limit for CS-2 systems.
+
+We believe these power estimates are sufficiently accurate to clearly illustrate the large difference in energy consumption between conventional hardware and the Cerebras CS-2 for the molecular dynamics simulations presented in this paper.
+
+\end{document}
