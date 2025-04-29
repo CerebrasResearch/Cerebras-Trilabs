@@ -1,0 +1,311 @@
+include "pinggrid.paint"
+
+let ioratiox = IORATX
+let ioratioy = IORATY
+let nio = NY//ioratioy
+
+let c0 = color()
+let c1 = color()
+let c2 = color()
+let c3 = color()
+
+let top2left = color()
+let top2left_x = color()
+let right2bottom = color()
+let right2bottom_x = color()
+let top2bottom = color()
+
+let leftingress   = color(2)
+let topegress     = color(3)
+let rightegress   = color(4)
+let bottomingress = color(5)
+
+let tmpcol = color()
+let topacross = color()
+let rightacross = color()
+
+let syncsize = 256
+let nrot = 10
+let ncross = 10
+
+let tmpsync = color()
+let l2r_sync = color()
+let r2l_sync = color()
+let pingcolor = color()
+
+
+let n = N
+let p = P
+let nx = NX
+let ny = NY
+
+let x00 = rect(0 0 1 1)
+let x01 = rect(0 1 1 1)
+let x10 = rect(1 0 1 1)
+let x11 = rect(1 1 1 1)
+
+x00 : code('marching2D [left:c0 right:c1 up:c2 down:c3 ping:pingcolor n:n p:p])
+x01 : code('marching2D [left:c0 right:c1 up:c3 down:c2 ping:pingcolor n:n p:p])
+x10 : code('marching2D [left:c1 right:c0 up:c2 down:c3 ping:pingcolor n:n p:p])
+x11 : code('marching2D [left:c1 right:c0 up:c3 down:c2 ping:pingcolor n:n p:p])
+
+x00 : name('core00)
+x01 : name('core01)
+x10 : name('core10)
+x11 : name('core11)
+
+x00 : paint(c0 [L>C])
+x00 : paint(c1 [C>R])
+x00 : paint(c2 [C>U])
+x00 : paint(c3 [D>C])
+
+x01 : paint(c0 [L>C])
+x01 : paint(c1 [C>R])
+x01 : paint(c3 [C>U])
+x01 : paint(c2 [D>C])
+
+x10 : paint(c1 [L>C])
+x10 : paint(c0 [C>R])
+x10 : paint(c2 [C>U])
+x10 : paint(c3 [D>C])
+
+x11 : paint(c1 [L>C])
+x11 : paint(c0 [C>R])
+x11 : paint(c3 [C>U])
+x11 : paint(c2 [D>C])
+
+let corerect = union(x00 x01 x10 x11)
+corerect : hstackrep(nx/2)
+corerect : vstackrep(ny/2)
+corerect : place(0 1)
+
+let mdown  = rect(0 0 nx 1)
+let mup    = rect(0 ny+1 nx 1)
+
+
+mup   : paint(c3 [D>C])
+mup   : paint(top2left [C>])
+mup   : code('recolor-moat [rx:c3 tx:top2left])
+mup : terminal('mupterm 'data CENTER top2left [nx] [nx] 1)
+mup : name('mup)
+
+mdown : paint(right2bottom_x [>C])
+mdown : paint(c3 [C>U])
+mdown : code('recolor-moat [rx:right2bottom_x tx:c3])
+mdown : terminal('mdownterm 'data CENTER right2bottom_x [nx] [nx] 1)
+mdown : name('mdown)
+
+let moat = union(mup mdown)
+
+
+(* Paint io complex *)
+
+define makefan(fansize chunksize fin fout) {
+  let top1    = tile()
+  let body1   = tile()
+  let bottom1 = tile()
+
+  top1    : paint(fin [D>C ; C>C*])
+  body1   : paint(fin [D>CU ; D>C ; C>C*])
+  bottom1 : paint(fin [L>CU ; L>C ; C>C*])
+
+  let fancode = tile()
+  fancode : code('nfrom1fan4
+                   [rx:fin tx:fout ndata:chunksize
+		    fansize:fansize idx:@idx])
+
+  let vidx = range(0 fansize)
+  let xfan = arrayplace(fancode vidx [idx:vidx])
+  xfan : paint(fout [C>R])
+  xfan : union(vstack(bottom1 vstackrep(body1 fansize-2) top1))
+}
+
+define makefunnel(funnelsize chunksize fin fout) {
+  let top2 = tile()
+  let body2 = tile()
+  let bottom2 = tile()
+
+  top2    : code('nto1funnel2 [rx:fin tx:fout ndata:chunksize top:1])
+  body2   : code('nto1funnel2 [rx:fin tx:fout ndata:chunksize top:0])
+  bottom2 : code('nto1funnel2 [rx:fin tx:fout ndata:chunksize top:0])
+
+  top2    : paint(fout [C>D])
+  body2   : paint(fout [C>D* ; U>D ; pop=adv])
+  bottom2 : paint(fout [C>R* ; U>R ; pop=adv])
+
+  let xfunnel = vstack(bottom2 vstackrep(body2 funnelsize-2) top2)
+  xfunnel : paint(fin [L>C])
+}
+
+let leftfan     = makefan(ioratioy 4 tmpsync c0)
+let leftfunnel  = hflip(makefunnel(ioratiox 4 top2left_x tmpcol))
+leftfunnel : vstack(rect(0 0 1 ioratioy-ioratiox))
+let rightfan    = hflip(makefan(ioratiox 4 tmpsync right2bottom))
+rightfan : vstack(rect(0 0 1 ioratioy-ioratiox))
+let rightfunnel = makefunnel(ioratioy 4 c0 tmpcol)
+(* Data through fan column to funnel column *)
+leftfan : paint(top2left_x [R>L])
+rightfan : paint(c0 [L>R])
+(* Data through bottom of funnel to bottom of fan *)
+leftfunnel : union(paint(tile() tmpsync [L>R]))
+rightfunnel : union(paint(tile() tmpsync [R>L]))
+
+
+let leftbuf = tile()
+leftbuf : code('recolor-moat [rx:tmpcol tx:topegress])
+leftbuf : paint(tmpcol [R>C])
+leftbuf : paint(topegress [C>L])
+leftbuf : paint(tmpsync [L>R])
+
+
+let leftleft = tile()
+leftleft : code('recolor-moat [rx:leftingress tx:tmpsync])
+leftleft : paint(topegress [R>L])
+leftleft : paint(leftingress [L>C])
+leftleft : paint(tmpsync [C>R])
+
+let leftleftcontrol = tile()
+leftleftcontrol : code('recolor-moat-control [rx:leftingress tx:tmpsync
+		                              npass:syncsize*nrot*ncross])
+leftleftcontrol : paint(topegress [R>L])
+leftleftcontrol : paint(leftingress [L>C])
+leftleftcontrol : paint(tmpsync [C>R])
+
+let leftbufsync = tile()
+leftbufsync : paint(tmpcol [R>C])
+leftbufsync : paint(topegress [C>L])
+leftbufsync : paint(tmpsync [L>R ; L>C*])
+leftbufsync : paint(l2r_sync [C>R])
+leftbufsync : paint(r2l_sync [R>C])
+
+leftbufsync : code('recolor-moat-sync [rx:tmpcol tx:topegress
+	    sendup:topegress recvdown:r2l_sync
+	    sendright:l2r_sync recvleft:tmpsync ping:pingcolor
+	    n:syncsize nrot:nrot ncross:ncross])
+
+let leftbufsyncX = leftbufsync
+leftbufsync : paint(pingcolor [C>R])
+leftbufsyncX : paint(pingcolor [C>])
+
+
+let rightbuf = tile()
+rightbuf : paint(tmpcol [L>C])
+rightbuf : paint(rightegress [C>R])
+rightbuf : paint(tmpsync [R>L])
+rightbuf : code('recolor-moat [rx:tmpcol tx:rightegress])
+
+let rightright = tile()
+rightright : code('recolor-moat [rx:bottomingress tx:tmpsync])
+rightright : paint(rightegress [L>R])
+rightright : paint(bottomingress [R>C])
+rightright : paint(tmpsync [C>L])
+
+let rightrightcontrol = tile()
+rightrightcontrol : code('recolor-moat-control [rx:bottomingress tx:tmpsync
+		                              npass:syncsize*nrot*ncross])
+rightrightcontrol : paint(rightegress [L>R])
+rightrightcontrol : paint(bottomingress [R>C])
+rightrightcontrol : paint(tmpsync [C>L])
+
+let rightbufsync = tile()
+rightbufsync : paint(tmpcol [L>C])
+rightbufsync : paint(rightegress [C>R])
+rightbufsync : paint(tmpsync [R>L ; R>C*])
+rightbufsync : paint(l2r_sync [L>C])
+rightbufsync : paint(r2l_sync [C>L])
+rightbufsync : paint(pingcolor [C>])
+
+rightbufsync : code('recolor-moat-sync [rx:tmpcol tx:rightegress
+	    sendup:r2l_sync recvdown:tmpsync
+	    sendright:rightegress  recvleft:l2r_sync  ping:pingcolor
+	    n:syncsize nrot:nrot ncross:ncross])
+
+let leftiostack  = vstack(
+     hstack(leftleftcontrol leftbufsync leftfunnel leftfan)
+     vstackrep(hstack(leftleftcontrol leftbufsyncX leftfunnel leftfan) nio-1)
+    )
+
+let rightiostack = vstackrep(
+        hstack(rightfan rightfunnel rightbufsync rightrightcontrol) nio
+    )
+leftiostack  : place(0 1)
+rightiostack : place(0 1)
+
+(* End of io complex *)
+
+
+let pg = makepinggrid(nx ny pingcolor)
+pg : place(0 1)
+let grid = union(corerect moat pg)
+let all = hstack(leftiostack grid rightiostack) 
+
+
+
+let leftar = vstackrep(rect(0 0 1 ioratiox) nio ioratioy-ioratiox)
+leftar : paint(top2left_x [>C])
+leftar : terminal('leftterm 'data CENTER top2left_x [nx] [nx] 1)
+leftar : name('leftar)
+leftar : place(2 1)
+let mup2leftar = transport('mup.mupterm 'leftar.leftterm 'mup2leftar)
+
+let rightar = vstackrep(rect(0 0 1 ioratiox) nio ioratioy-ioratiox)
+rightar : paint(right2bottom [C>])
+rightar : terminal('rightterm 'data CENTER right2bottom [nx] [nx] 1)
+rightar : name('rightar)
+rightar : place(nx+4 1)
+let rightar2mdown = transport('rightar.rightterm 'mdown.mdownterm 'rightar2mdown)
+
+all : union(mup2leftar leftar rightar2mdown rightar)
+
+
+let across = rect(2 0 nx+4 1)
+across : paint(l2r_sync [L>R])
+across : paint(r2l_sync [R>L])
+across : vstackrep(nio ioratioy-1)
+across : place(0 1)
+let pinginput = rect(2 1 2 1)
+pinginput : paint(pingcolor [L>R])
+across : union(pinginput)
+
+all : union(across)
+
+all : colorpair(top2left top2left_x)
+all : colorpair(right2bottom right2bottom_x)
+
+(* I not using IO, comment out the next line *)
+setif(FLIP hflip(all) all)
+
+(* Stuff for running without IO *)
+(*
+let leftroce = tile()
+leftroce : code('recolor2-moat
+                  [rx1:topegress   tx1:topacross
+		   rx2:rightacross tx2:leftingress])
+leftroce : paint(topegress   [R>C])
+leftroce : paint(topacross   [C>R])
+leftroce : paint(rightacross [R>C])
+leftroce : paint(leftingress [C>R])
+leftroce : vstackrep(nio ioratioy-1)
+leftroce : place(0 1)
+
+let rightroce = tile()
+rightroce : code('recolor2-moat
+                   [rx1:rightegress tx1:rightacross
+		    rx2:topacross   tx2:bottomingress])
+rightroce : paint(rightegress   [L>C])
+rightroce : paint(rightacross   [C>L])
+rightroce : paint(topacross     [L>C])
+rightroce : paint(bottomingress [C>L])
+rightroce : vstackrep(nio ioratioy-1)
+rightroce : place(0 1)
+
+let allroce = hstack(leftroce all rightroce)
+let roce2roce = rect(0 0 NX+8 1)
+roce2roce : paint(topacross [L>R])
+roce2roce : paint(rightacross [R>L])
+roce2roce : vstackrep(nio ioratioy-1)
+roce2roce : place(1 1)
+
+allroce : union(roce2roce)
+setif(FLIP hflip(allroce) allroce)
+*)

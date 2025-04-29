@@ -1,0 +1,17 @@
+
+define makepinggrid(nx ny c) {
+  
+  let bottom = paint(tile() c [L>CRU])
+  bottom : hstackrep(nx-1)
+
+  let bottomright = paint(tile() c [L>CU])
+  let vertup = paint(tile() c [D>CU])
+  let top = paint(tile() c [D>C])
+
+  let block = vstack(
+    hstack(bottom bottomright)
+    vstackrep(hstackrep(vertup nx) ny-2)
+    hstackrep(top nx)
+  )
+  block : name('pinggrid)
+}
