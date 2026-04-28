@@ -1,6 +1,6 @@
 /*
  * Released under BSD 3-Clause License,
- * Copyright (c) 2026 Cerebras Systems Inc.
+ * Copyright (c) 2026 [Redacted for anonymous review]
  * All rights reserved.
  */
 
