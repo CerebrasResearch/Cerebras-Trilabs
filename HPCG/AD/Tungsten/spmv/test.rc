@@ -1,0 +1,15 @@
+largep4l0 H=768 V=1168 Z=192 NGS=16 P=4 L=0
+largep4l1 H=768 V=1168 Z=192 NGS=16 P=4 L=1
+largep4l2 H=768 V=1168 Z=192 NGS=16 P=4 L=2
+largep4l3 H=768 V=1168 Z=192 NGS=16 P=4 L=3
+scale_xy_16l0 H=16 V=16 Z=192 NGS=16 P=4 L=0
+scale_xy_32l0 H=32 V=32 Z=192 NGS=16 P=4 L=0
+scale_xy_64l0 H=64 V=64 Z=192 NGS=16 P=4 L=0
+scale_xy_128l0 H=128 V=128 Z=192 NGS=16 P=4 L=0
+scale_xy_256l0 H=256 V=256 Z=192 NGS=16 P=4 L=0 
+scale_xy_512l0 H=512 V=512 Z=192 NGS=16 P=4 L=0
+scale_z_32l0z32 H=32 V=32 Z=32 NGS=16 P=4 L=0
+scale_z_32l0z64 H=32 V=32 Z=64 NGS=16 P=4 L=0
+scale_z_32l0z96 H=32 V=32 Z=96 NGS=16 P=4 L=0
+scale_z_32l0z128 H=32 V=32 Z=128 NGS=16 P=4 L=0
+scale_z_32l0z160 H=32 V=32 Z=160 NGS=16 P=4 L=0

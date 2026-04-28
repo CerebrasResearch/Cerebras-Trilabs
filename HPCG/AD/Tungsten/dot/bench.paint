@@ -1,0 +1,29 @@
+let vr = color(20) let hr = color(21) let bc = color(22)
+
+let body = rect(1 1 H V)
+body : code("dot" [Z:Z NDOT:NDOT s0:bc tx:hr])
+
+let left_moat = rect(0 1 1 V)
+left_moat : code("src_left" [NDOT:NDOT tx:hr rx:bc])
+left_moat : paint(hr [C>R])
+left_moat : paint(bc [R>C])
+
+let topright_moat = rect(H+1 V+1 1 1)
+topright_moat : code("src_top" [NDOT:NDOT tx:vr rx:bc])
+topright_moat : paint(vr [C>D])
+topright_moat : paint(bc [D>C])
+
+let right_moat = rect(H+1 1 1 V)
+right_moat : code("forward" [NDOT:NDOT rx:hr v:vr X:H])
+right_moat : paint(hr [L>C])
+right_moat : paint(vr [C>D; U>D; pop=adv ring])
+right_moat : paint(bc [D>UL|U])
+
+let botright_moat = rect(H+1 0 1 1)
+botright_moat : code("recolor" [NDOT:NDOT rx:vr tx:bc Y:V])
+botright_moat : paint(vr [U>C])
+botright_moat : paint(bc [C>U])
+
+let padded = rect(0 0 H+2 V+2)
+
+union(padded left_moat body topright_moat right_moat botright_moat)

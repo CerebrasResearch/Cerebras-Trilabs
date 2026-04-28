@@ -1,0 +1,4 @@
+timing dot16x16 H=16 V=16 Z=128 NDOT=3
+timing dot32x32 H=32 V=32 Z=128 NDOT=3
+timing dot128x128 H=128 V=128 Z=128 NDOT=3
+timing dotlarge H=768 V=1168 Z=128 NDOT=3
